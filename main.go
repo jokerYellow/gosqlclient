@@ -31,6 +31,9 @@ func init() {
 
 func main() {
 	flag.Parse()
+	if len(sqlConfig) == 0 {
+		log.Fatal("mysql param is missing")
+	}
 	fmt.Println("sqlconfig:\n" + sqlConfig)
 	db, err := sql.Open("mysql", sqlConfig)
 	if err != nil {
