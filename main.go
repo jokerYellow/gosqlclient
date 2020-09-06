@@ -42,7 +42,6 @@ func main() {
 	db.SetConnMaxLifetime(time.Minute * 3)
 	db.SetMaxOpenConns(1)
 	db.SetMaxIdleConns(1)
-	query(db, "select * from musics")
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Println("input sql statements:")
