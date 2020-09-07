@@ -9,10 +9,13 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"strings"
 	"time"
 )
 
 var sqlConfig string
+
+var updatekeys = []string{"update", "delete", "use", "insert"}
 
 type Output struct {
 	items     [][]string
@@ -49,13 +52,44 @@ func main() {
 	for {
 		fmt.Println("input sql statements:")
 		if sqlstate, e := reader.ReadString('\n'); e == nil {
-			query(db, sqlstate)
+			fmt.Printf("do: \n%s", sqlstate)
+			if isUpdate(sqlstate) {
+				update(db, sqlstate)
+			} else {
+				query(db, sqlstate)
+			}
 		}
 	}
 }
 
+func isUpdate(sql string) bool {
+	sql = strings.ToLower(sql)
+	sql = strings.TrimLeft(sql," ")
+	for _, v := range updatekeys {
+		if strings.HasPrefix(sql, v) {
+			return true
+		}
+	}
+	return false
+}
+
+func update(db *sql.DB, stat string) {
+	rt, err := db.Exec(stat)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	rowsAffected, e := rt.RowsAffected()
+	if e == nil {
+		log.Printf("rowsAffected:%d\n", rowsAffected)
+	}
+	lastInsertId, e := rt.LastInsertId()
+	if e == nil {
+		log.Printf("lastInsertId:%d\n", lastInsertId)
+	}
+}
+
 func query(db *sql.DB, stat string) {
-	fmt.Printf("query:\n%s\n", stat)
 	rows, err := db.Query(stat)
 	if err != nil {
 		log.Println(err)
